@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ذكاء اصطناعي لمكافحة التنمر المدرسي - النسخة المتطورة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e2b3c, #0f1a24);
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1300px;
+            margin: auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 15px;
+        }
+        .tab-btn {
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(4px);
+        }
+        .tab-btn.active {
+            background: #ff9800;
+            color: #1e2b3c;
+            box-shadow: 0 0 15px #ff9800;
+        }
+        .tab-btn:hover {
+            background: #ff9800;
+            transform: scale(1.02);
+        }
+
+        .page {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+        .page.active-page {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.2);
+        }
+        h2 {
+            color: #ffb347;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h3 {
+            color: #f0f0f0;
+            margin: 15px 0 10px;
+        }
+        p, label {
+            color: #f5f5f5;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 28px;
+            border: none;
+            background: #fff2e0;
+            font-size: 1rem;
+            margin: 15px 0;
+            resize: vertical;
+            transition: 0.2s;
+        }
+        textarea:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 10px #ff9800;
+            outline: none;
+        }
+        button {
+            background: #ff9800;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e2b3c;
+        }
+        button:hover {
+            background: #ffb64d;
+            transform: scale(0.98);
+        }
+        .result-box {
+            background: #0f1a24;
+            padding: 20px;
+            border-radius: 24px;
+            margin-top: 20px;
+            border-right: 6px solid #ff9800;
+            transition: 0.2s;
+        }
+        .chat-area {
+            background: rgba(0,0,0,0.4);
+            border-radius: 28px;
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 12px 0;
+            padding: 12px 18px;
+            border-radius: 28px;
+            max-width: 85%;
+            animation: fadeSlide 0.3s;
+        }
+        .user-msg {
+            background: #ff9800;
+            color: #1e2b3c;
+            margin-right: auto;
+            text-align: right;
+        }
+        .ai-msg {
+            background: #2c3e44;
+            color: white;
+            margin-left: auto;
+            text-align: left;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateX(20px);}
+            to { opacity: 1; transform: translateX(0);}
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 14px;
+            border-radius: 50px;
+            border: none;
+            background: #fff6ea;
+        }
+        .emotion-badge {
+            background: #ff9800;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            margin-top: 12px;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .floating-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        footer {
+            text-align: center;
+            color: #bbb;
+            margin-top: 30px;
+        }
+        @media (max-width: 700px) {
+            .tabs { justify-content: center; }
+            .tab-btn { padding: 8px 16px; font-size: 0.8rem;}
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="tabs">
+        <button class="tab-btn active" data-page="page1">🏠 الرئيسية</button>
+        <button class="tab-btn" data-page="page2">⚠️ كاشف التنمر بالذكاء الاصطناعي</button>
+        <button class="tab-btn" data-page="page3">🧠 المستشار النفسي التفاعلي</button>
+        <button class="tab-btn" data-page="page4">💬 اسأل الذكاء الاصطناعي (أي سؤال)</button>
+    </div>
+
+    <!-- الصفحة 1: الرئيسية مع أنيميشنات متعددة -->
+    <div id="page1" class="page active-page">
+        <div class="card">
+            <h2>🤝 ذكاء اصطناعي لمدرسة بلا تنمر</h2>
+            <p>هذا النظام يستخدم تقنيات الذكاء الاصطناعي لاكتشاف الكلمات المسيئة وتحليل المشاعر، كما يقدم دعماً نفسياً فورياً ويرد على استفساراتك.</p>
+            <div class="result-box" style="text-align:center;">
+                <span class="floating-icon" style="font-size:3rem; display:inline-block;">🧑‍🏫❤️</span>
+                <h3>أنيميشن تفاعلي: "معاً نوقف التنمر"</h3>
+                <div id="animationBox" style="background:#00000055; border-radius: 40px; padding: 20px; margin-top:10px;">
+                    <div id="animatedIcon" style="font-size: 3rem; transition: 0.2s;">🤖✨</div>
+                    <p id="animationText" style="margin-top: 10px;">الذكاء الاصطناعي يستمع ويحمي...</p>
+                </div>
+                <button id="startAnimationBtn">🎬 تشغيل أنيميشن الأمل</button>
+                <button id="confettiBtn" style="margin-right:10px;">🎉 أنيميشن الفرح</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>🎯 كيف يساعدك الذكاء الاصطناعي؟</h3>
+            <ul style="color:white; margin-right:25px;">
+                <li>✅ يكشف الكلمات المسيئة والتنمر اللفظي في النصوص.</li>
+                <li>✅ يحلل مشاعرك ويمنحك ردوداً داعمة نفسياً.</li>
+                <li>✅ يجيب عن أسئلتك: كيفية مواجهة المتنمر، التعافي، الثقة.</li>
+                <li>✅ يوفر مساحة آمنة للفضفضة في أي وقت.</li>
+                <li>✅ أنيميشنات تفاعلية تنشر الأمل والطاقة الإيجابية.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- الصفحة 2: كاشف التنمر -->
+    <div id="page2" class="page">
+        <div class="card">
+            <h2>🔍 الذكاء الاصطناعي لاكتشاف الكلمات المسيئة</h2>
+            <p>اكتب جملة (بالإنجليزية أو العربية)، وسيحللها النظام فوراً ويكتشف إذا كان فيها تنمر أو إساءة.</p>
+            <textarea id="bullyText" rows="3" placeholder="مثال: أنت غبي .. أو أنت فاشل .. أو أي جملة مسيئة"></textarea>
+            <button id="detectBtn">🚨 تحليل بالنص</button>
+            <div id="detectResult" class="result-box">
+                <strong>النتيجة:</strong> <span id="detectMsg">في انتظار إدخالك...</span>
+                <div id="emotionAdvice" style="margin-top: 12px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الصفحة 3: الدعم النفسي مع تحليل المشاعر (مُغذى بكلمات أكثر) -->
+    <div id="page3" class="page">
+        <div class="card">
+            <h2>🧘 المستشار النفسي التفاعلي</h2>
+            <p>اكتب ما تشعر به الآن (حزين، خائف، وحيد، غاضب، مقهور، مرهق، مهمش...) وسيقدم لك الذكاء الاصطناعي نصائح فورية.</p>
+            <textarea id="feelInput" rows="2" placeholder="مثال: أشعر بأن لا أحد يحميني، تعرضت للتنمر اليوم..."></textarea>
+            <button id="supportBtn">💬 احصل على دعم نفسي</button>
+            <div id="supportResult" class="result-box">
+                <span id="supportText">📖 سأكون هنا لأجلك... اكتب لي مشاعرك</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- الصفحة 4: شات بوت ذكي (مُغذى بسيناريوهات متعددة) -->
+    <div id="page4" class="page">
+        <div class="card">
+            <h2>💬 المحاور الذكي (اسأل عن التنمر أو الصحة النفسية)</h2>
+            <div class="chat-area" id="chatBox">
+                <div class="message ai-msg">مرحباً! أنا ذكاء اصطناعي لمكافحة التنمر. اسألني أي شيء: كيف أواجه المتنمر؟ كيف أستعيد ثقتي؟ أو شاركني مشاعرك.</div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="chatInput" placeholder="اكتب سؤالك أو شارك ما تشعر به ...">
+                <button id="sendChatBtn">إرسال</button>
+            </div>
+            <p style="font-size:0.8rem; margin-top:8px;">✨ النظام يحلل الكلمات المسيئة ويقدم ردوداً آمنة وعلاجية.</p>
+        </div>
+    </div>
+    <footer>🌱 الذكاء الاصطناعي متاح 24/7 - كن أنت التغيير، معاً ضد التنمر</footer>
+</div>
+
+<script>
+    // ------------------------- قائمة موسعة جداً للكلمات المسيئة -------------------------
+    const offensiveWords = [
+        "غبي", "فاشل", "حمار", "تافه", "حقير", "خاين", "وسخ", "stupid", "idiot", "fool", "loser", "ugly", "kill yourself", "dumb", "hate you",
+        "أبله", "معتوه", "مريض نفسي", "منافق", "جبان", "خنزير", "كلب", "عاهر", "قذر", "غبي جدا", "retard", "moron", "pathetic", "worthless"
+    ];
+    
+    // وظيفة كشف التنمر
+    function detectBullying(text) {
+        let lowerText = text.toLowerCase();
+        let found = [];
+        for(let word of offensiveWords) {
+            if(lowerText.includes(word.toLowerCase())) {
+                found.push(word);
+            }
+        }
+        if(found.length > 0) {
+            return { isBully: true, words: found };
+        } else {
+            if(lowerText.includes("لا تسوى") || lowerText.includes("انت لا شيء") || lowerText.includes("ما تستاهل") || lowerText.includes("أنت لا شيء")) {
+                return { isBully: true, words: ["عبارة مهينة"] };
+            }
+            return { isBully: false, words: [] };
+        }
+    }
+
+    // ------------------------- دعم نفسي متطور مع كلمات ومشاعر أكثر -------------------------
+    function getPsychologicalSupport(userFeeling) {
+        let feeling = userFeeling.toLowerCase();
+        
+        // مشاعر الحزن والاكتئاب
+        if(feeling.includes("حزين") || feeling.includes("sad") || feeling.includes("مكتئب") || feeling.includes("depressed") || feeling.includes("يائس") || feeling.includes("بائس")) {
+            return "😢 أشعر أنك تمر بوقت صعب. تذكر أن قيمتك لا يحددها الآخرون. التنمر مؤلم لكنك أقوى مما تتصور. تحدث مع مرشد أو شخص تثق به. أنت مهم.";
+        } 
+        // الخوف والقلق
+        else if(feeling.includes("خائف") || feeling.includes("خوف") || feeling.includes("fear") || feeling.includes("قلق") || feeling.includes("anxious") || feeling.includes("مرعوب")) {
+            return "😨 الخوف طبيعي بعد التعرض للتنمر. الذكاء الاصطناعي يدعمك: أنت لست وحدك، يمكنك تعلم الدفاع عن نفسك بالحزم والتحدث مع معلم. التنفس العميق يساعد.";
+        } 
+        // الوحدة والعزلة
+        else if(feeling.includes("وحيد") || feeling.includes("lonely") || feeling.includes("وحدة") || feeling.includes("منبوذ") || feeling.includes("مهمش")) {
+            return "🤝 الوحدة شعور صعب. لكن هناك دائماً من يهتم لأمرك. شاركتني شعورك خطوة شجاعة. حاول الانضمام لنشاطات مدرسية، ستجد أصدقاء حقيقيين. أنت لست وحدك أبداً.";
+        } 
+        // الغضب والإحباط
+        else if(feeling.includes("غضب") || feeling.includes("angry") || feeling.includes("غاضب") || feeling.includes("محبط") || feeling.includes("frustrated")) {
+            return "😤 الغضب طبيعي من التنمر. بدلاً من الرد بعنف، جرب التنفس العميق واكتب مشاعرك هنا. لا تدع المتنمر يتحكم بمشاعرك. أنت الأقوى.";
+        }
+        // التعرض للتنمر بشكل مباشر
+        else if(feeling.includes("تعرضت للتنمر") || feeling.includes("تنمر") || feeling.includes("bullying") || feeling.includes("تم استهدافي") || feeling.includes("أهانني")) {
+            return "🛡️ آسف أنك تعرضت لهذا. تذكر: التنمر خطأ المتنمر وليس خطأك. احتفظ بالأدلة وتحدث مع شخص بالغ. أنت تستحق الاحترام. نحن معك.";
+        }
+        // مشاعر الخجل والعار
+        else if(feeling.includes("خجل") || feeling.includes("عار") || feeling.includes("embarrassed") || feeling.includes("محرج")) {
+            return "💙 لا تشعر بالخجل أبداً. ما حدث ليس عيباً فيك. التنمر هو سلوك خاطئ من الآخرين. تحدث بجرأة، ففضح التنمر هو الطريق لإنهائه.";
+        }
+        // مشاعر الإرهاق والتعب النفسي
+        else if(feeling.includes("مرهق") || feeling.includes("تعبان") || feeling.includes(" exhausted") || feeling.includes(" burnout")) {
+            return "😓 من الطبيعي أن تشعر بالإرهاق النفسي بعد أي تنمر. خذ قسطاً من الراحة، وافعل شيئاً تحبه. عقلك وجسدك يحتاجان للتعافي. أنت قوي.";
+        }
+        // عدم التقدير أو الاحترام
+        else if(feeling.includes("لا يقدروني") || feeling.includes("غير محترم") || feeling.includes(" disrespect")) {
+            return "⭐ قيمتك الحقيقية تأتي من داخلك، وليس من كلام الآخرين. أنت شخص مميز. ركز على من يحبك ويقدرك.";
+        }
+        else {
+            return "💙 شكراً لمشاركتك. أنت إنسان قيم. إذا كنت بحاجة لتقنيات عملية لمواجهة التنمر، اسألني مباشرة. وسأكون هنا لدعمك. 🌟 تذكر: الأمل موجود دائماً.";
+        }
+    }
+
+    // ------------------------- الردود الذكية على أسئلة وسيناريوهات متعددة (تم تغذية السكشن بمزيد من السيناريوهات) -------------------------
+    function aiChatResponse(question) {
+        let q = question.toLowerCase();
+        
+        // فحص الكلمات المسيئة
+        const bullyCheck = detectBullying(q);
+        if(bullyCheck.isBully) {
+            return "🚫 لقد استخدمت كلمات غير لائقة. تذكر أن الاحترام أساس الحوار. هل تريد مساعدة في التعامل مع الغضب؟";
+        }
+        
+        // سيناريوهات متنوعة وجديدة
+        
+        // سؤال عن التنمر الإلكتروني
+        if(q.includes("تنمر إلكتروني") || q.includes("cyberbullying") || q.includes("الإنترنت")) {
+            return "📱 التنمر الإلكتروني خطير جداً. احتفظ بلقطات الشاشة، لا ترد على المتنمر، وابلغ المنصة فوراً. يمكنك أيضاً حظر الشخص. أنت لست وحدك.";
+        }
+        // سؤال عن كيفية التصالح مع الذات
+        if(q.includes("تصالح مع نفسي") || q.includes("تقبل نفسي") || q.includes("self acceptance")) {
+            return "🌈 التصالح مع الذات يبدأ بأن تسامح نفسك على أي شيء. اكتب كل يوم شيئاً تحبه في نفسك. أنت كافٍ كما أنت. لا تنتظر موافقة الآخرين.";
+        }
+        // سؤال عن الخوف من الذهاب للمدرسة
+        if(q.includes("خائف من المدرسة") || q.includes("لا أريد الذهاب") || q.includes("school anxiety")) {
+            return "🏫 الخوف من المدرسة بسبب التنمر شعور حقيقي. تحدث مع معلم أو مرشد مدرسي. هناك حلول مثل تغيير المقعد أو وجود صديق بجانبك. لا تخف، الإدارة المدرسية تدعمك.";
+        }
+        // سؤال عن كيفية مساعدة صديق يتعرض للتنمر
+        if(q.includes("مساعدة صديق") || q.includes("صديقي يتعرض للتنمر") || q.includes("how to help a friend")) {
+            return "👭 أنت صديق رائع لأنك تريد المساعدة. استمع له بدون إصدار أحكام، شجعه على التحدث لشخص بالغ، وابق بجانبه. وجود شخص داعم يصنع فرقاً كبيراً.";
+        }
+        // سؤال عن الثقة بالنفس بعد التنمر
+        if(q.includes("الثقة") || q.includes("استعيد ثقتي") || q.includes("self confidence") || q.includes("أنا لا أثق بنفسي")) {
+            return "💪 استعادة الثقة تبدأ بتقدير الذات. اكتب يومياً ثلاثة أشياء جيدة عن نفسك. ابتعد عن النقاد، ومارس هوايات تبرع فيها. أنت تملك قوة داخلية عظيمة.";
+        }
+        // سؤال عن الإبلاغ عن التنمر
+        if(q.includes("الإبلاغ") || q.includes("بلغ") || q.includes("report")) {
+            return "📢 يمكنك الإبلاغ عن التنمر للمدرسة عبر صندوق الشكاوى أو للمرشد الطلابي. احتفظ بلقطات شاشة أو أدلة. الإبلاغ ليس ضعفاً، بل شجاعة تحمي الجميع.";
+        }
+        // سؤال عن مشاعر الحزن المتكررة
+        if(q.includes("أشعر") || q.includes("حزين") || q.includes("بكاء") || q.includes("crying")) {
+            return getPsychologicalSupport(question);
+        }
+        // سؤال عن نصائح للتعافي النفسي
+        if(q.includes("تعافي") || q.includes("healing") || q.includes("كيف أنسى")) {
+            return "🌱 التعافي يحتاج وقتاً. مارس التأمل، اكتب يومياتك، مارس رياضة تحبها. وإذا احتجت مساعدة متخصصة، فالتحدث مع معالج نفسي خطوة قوية. أنت في رحلة شفاء.";
+        }
+        // سؤال عن كيفية الرد على المتنمر بحكمة
+        if(q.includes("أرد على المتنمر") || q.includes("ماذا أقول") || q.includes("smart reply")) {
+            return "🗣️ يمكنك أن تقول بحزم: 'كلامك لا يهمني'، أو 'هذا تصرف غير لائق'. ثم انسحب بثقة. لا تعطيه ردة فعل قوية. أفضل رد هو التجاهل ثم الإبلاغ.";
+        }
+        // سؤال عن مشاعر الغيرة أو الحسد
+        if(q.includes("غيرة") || q.includes("حسد") || q.includes("envy")) {
+            return "✨ الغيرة شعور إنساني، لكنها قد تؤذي. ركز على نجاحاتك وإنجازاتك. لا تقارن نفسك بالآخرين. كل شخص لديه طريقه الخاص.";
+        }
+        // سؤال عن الضغط الدراسي والتنمر
+        if(q.includes("ضغط دراسي") || q.includes("دراسة") || q.includes("school pressure")) {
+            return "📚 الضغط الدراسي صعب، وإذا أضيف له التنمر يصبح أثقل. نظم وقتك، خذ فترات راحة، وتحدث مع معلمك. أنت تبذل جهداً رائعاً.";
+        }
+        // سؤال عن الصداقة الحقيقية
+        if(q.includes("صديق حقيقي") || q.includes("true friend")) {
+            return "💖 الصديق الحقيقي هو من يدعمك وقت الشدة، لا يقلل من قيمتك، ويقف بجانبك ضد التنمر. ابحث عن الأشخاص الذين يبتسمون بوجودك.";
+        }
+        // سؤال عن كيف أكون قدوة
+        if(q.includes("قدوة") || q.includes("role model") || q.includes("ألهم الآخرين")) {
+            return "🌟 كونك قدوة يبدأ من موقفك ضد التنمر. دافع عن المظلوم، انشر الوعي، وكن لطيفاً. أفعالك الصغيرة تغير العالم.";
+        }
+        // تحية
+        if(q.includes("مرحب") || q.includes("السلام") || q.includes("hi") || q.includes("hello")) {
+            return "وعليكم السلام! 🙋‍♂️ أنا هنا لمساعدتك، اسأل عن أي شيء يخص التنمر أو الصحة النفسية. كيف يمكنني دعمك اليوم؟";
+        }
+        // سؤال عام عن خدمات الموقع
+        if(q.includes("ماذا تقدم") || q.includes("خدمات") || q.includes("what can you do")) {
+            return "🧠 أقدم كشفاً فورياً للتنمر اللفظي، دعماً نفسياً حسب مشاعرك، وإجابات ذكية لأسئلتك. جرب الأقسام المختلفة!";
+        }
+        
+        // رد عام داعم
+        return "🧠 شكراً لسؤالك. أنا نظام ذكاء اصطناعي متخصص بمكافحة التنمر المدرسي. استمر في الحديث، أو اسألني عن 'كيف أواجه المتنمر' أو 'الوحدة' أو 'التنمر الإلكتروني' وسأقدم لك أفضل الإجابات.";
+    }
+
+    // --- التبديل بين الصفحات ---
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pages = document.querySelectorAll('.page');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pageId = btn.getAttribute('data-page');
+            pages.forEach(page => page.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            tabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // --- أنيميشن الصفحة الرئيسية (مطور) ---
+    const animatedIcon = document.getElementById('animatedIcon');
+    const animationText = document.getElementById('animationText');
+    const startAnimBtn = document.getElementById('startAnimationBtn');
+    const confettiBtn = document.getElementById('confettiBtn');
+    
+    if(startAnimBtn) {
+        startAnimBtn.addEventListener('click', () => {
+            animatedIcon.style.transform = "scale(1.4) rotate(10deg)";
+            animationText.innerHTML = "✨ الكشف عن الكلمات المسيئة... 🚫 لا للتنمر! 🤖 يحمي الجميع";
+            animatedIcon.innerHTML = "🛡️🤖💙";
+            setTimeout(() => {
+                animatedIcon.style.transform = "scale(1)";
+                animationText.innerHTML = "الذكاء الاصطناعي يحلل مشاعرك ويدعمك نفسياً. أنت لست وحدك!";
+                animatedIcon.innerHTML = "💙🧠✨";
+            }, 2500);
+        });
+    }
+    
+    if(confettiBtn) {
+        confettiBtn.addEventListener('click', () => {
+            animatedIcon.style.transform = "scale(1.2)";
+            animationText.innerHTML = "🎉 أنت رائع! معاً نصنع مدرسة بلا تنمر 🎉";
+            animatedIcon.innerHTML = "🎊🥳🎈";
+            for(let i=0; i<30; i++) {
+                let conf = document.createElement('div');
+                conf.innerHTML = '🎉';
+                conf.style.position = 'fixed';
+                conf.style.left = Math.random() * window.innerWidth + 'px';
+                conf.style.top = '0px';
+                conf.style.fontSize = '24px';
+                conf.style.pointerEvents = 'none';
+                conf.style.zIndex = '9999';
+                conf.style.transition = 'all 2s ease';
+                document.body.appendChild(conf);
+                setTimeout(() => {
+                    conf.style.top = window.innerHeight + 'px';
+                    conf.style.transform = 'rotate(360deg)';
+                }, 10);
+                setTimeout(() => conf.remove(), 2000);
+            }
+            setTimeout(() => {
+                animatedIcon.style.transform = "scale(1)";
+                animationText.innerHTML = "الذكاء الاصطناعي يحلل مشاعرك ويدعمك نفسياً. أنت لست وحدك!";
+                animatedIcon.innerHTML = "💙🧠✨";
+            }, 2000);
+        });
+    }
+
+    // --- كاشف التنمر (الصفحة 2) مع أنيميشن ---
+    const detectBtn = document.getElementById('detectBtn');
+    const bullyText = document.getElementById('bullyText');
+    const detectMsgSpan = document.getElementById('detectMsg');
+    const emotionAdviceDiv = document.getElementById('emotionAdvice');
+    if(detectBtn) {
+        detectBtn.addEventListener('click', () => {
+            let text = bullyText.value;
+            if(!text.trim()) {
+                detectMsgSpan.innerText = "الرجاء كتابة جملة للتحليل.";
+                emotionAdviceDiv.innerHTML = "";
+                return;
+            }
+            const result = detectBullying(text);
+            if(result.isBully) {
+                detectMsgSpan.innerHTML = `⚠️ تم اكتشاف كلمات مسيئة: ${result.words.join(', ')}. هذا النمط يؤذي الآخرين. حاول استخدام كلمات محترمة.`;
+                emotionAdviceDiv.innerHTML = `<div class="emotion-badge">💡 نصيحة ذكاء اصطناعي: التنمر اللفظي يسبب ألماً نفسياً، كن صديقاً لا متنمراً. اختر كلماتك بعناية.</div>`;
+                const resBox = document.getElementById('detectResult');
+                resBox.style.transform = "scale(1.02)";
+                resBox.style.borderRightColor = "#ff4444";
+                setTimeout(()=> { resBox.style.transform = ""; resBox.style.borderRightColor = "#ff9800"; }, 400);
+            } else {
+                detectMsgSpan.innerHTML = "✅ لم يتم رصد كلمات مسيئة. هذا النص آمن. شكراً لاحترامك الآخرين.";
+                emotionAdviceDiv.innerHTML = `<div class="emotion-badge" style="background:#2e7d32;">🌟 كلماتك لطيفة، استمر في نشر الإيجابية. أنت قدوة حسنة.</div>`;
+            }
+        });
+    }
+
+    // --- الدعم النفسي (الصفحة 3) ---
+    const supportBtn = document.getElementById('supportBtn');
+    const feelInput = document.getElementById('feelInput');
+    const supportTextSpan = document.getElementById('supportText');
+    if(supportBtn) {
+        supportBtn.addEventListener('click', () => {
+            let feeling = feelInput.value;
+            if(!feeling.trim()) {
+                supportTextSpan.innerHTML = "📝 يرجى كتابة ما تشعر به حتى أستطيع مساعدتك.";
+                return;
+            }
+            let advice = getPsychologicalSupport(feeling);
+            supportTextSpan.innerHTML = advice + " ❤️";
+            const supportDiv = document.getElementById('supportResult');
+            supportDiv.style.animation = "none";
+            setTimeout(()=> supportDiv.style.animation = "fadeInUp 0.4s", 5);
+            // تأثير اهتزاز لطيف
+            supportDiv.style.transform = "scale(1.01)";
+            setTimeout(()=> supportDiv.style.transform = "", 300);
+        });
+    }
+
+    // --- شات بوت متطور مع سيناريوهات كثيرة ---
+    const chatBox = document.getElementById('chatBox');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+
+    function addMessage(msg, isUser) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message');
+        if(isUser) msgDiv.classList.add('user-msg');
+        else msgDiv.classList.add('ai-msg');
+        msgDiv.innerText = msg;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function processUserMessage(text) {
+        if(!text.trim()) return;
+        addMessage(text, true);
+        const bullyCheckMsg = detectBullying(text);
+        if(bullyCheckMsg.isBully) {
+            addMessage("🚫 لاحظت أن كلماتك قد تكون مسيئة. دعنا نتحاور باحترام. كيف يمكنني مساعدتك بطريقة إيجابية؟ تذكر أن الكلمة الطيبة صدقة.", false);
+            return;
+        }
+        const reply = aiChatResponse(text);
+        addMessage(reply, false);
+    }
+
+    if(sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            let userText = chatInput.value;
+            processUserMessage(userText);
+            chatInput.value = '';
+        });
+        chatInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+    }
+
+    console.log("تم تفعيل الذكاء الاصطناعي المتطور مع أنيميشنات وكلمات دعم نفسي موسعة وأسئلة متعددة");
+</script>
+</body>
+</html>
